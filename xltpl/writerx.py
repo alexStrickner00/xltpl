@@ -56,7 +56,6 @@ class BookWriter(BookBase, BookMixin):
         tree = Tree(index, self.node_map)
         user_tags = [ tag for ext in self.user_extensions for tag in ext.tags] #flattening
         recompile_patterns(user_tags)
-        print(user_tags)
         max_row = max(sheet.max_row, merger.image_merger.max_row)
         max_col = max(sheet.max_column, merger.image_merger.max_col)
         for rowx in range(1, max_row + 1):

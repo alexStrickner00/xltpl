@@ -4,6 +4,7 @@ import six
 from .utils import cust_test, tag_test, xv_test, v_test, find_cell_tag, block_split, rich_split, img_test
 from .misc import TreeProperty
 
+
 class Node(object):
     node_map = TreeProperty('node_map')
     ext_tag = 'node'
@@ -77,6 +78,7 @@ class Node(object):
     def set_image_ref(self, image_ref, image_key):
         self._parent.set_image_ref(image_ref, image_key)
 
+
 class Segment(Node):
 
     def __init__(self, text):
@@ -85,13 +87,14 @@ class Segment(Node):
 
     @property
     def node_tag(self):
-        #fmt = "{%%seg '%s'%%}%s{%%endseg%%}"
+        # fmt = "{%%seg '%s'%%}%s{%%endseg%%}"
         fmt = "{%%seg %d%%}%s{%%endseg%%}"
         return fmt % (self.node_key, self.text)
 
     def process_rv(self, rv):
         self._parent.process_child_rv(rv)
         return rv
+
 
 class RichSegment(Segment):
 
@@ -107,19 +110,22 @@ class RichSegment(Segment):
         self.rv = rv
         return self.text
 
+
 class BlockSegment(Segment):
 
     @property
     def node_tag(self):
         return self.text
 
+
 class ImageSegment(Segment):
 
     @property
     def node_tag(self):
-        #fmt = "{%%seg '%s'%%}{%%endseg%%}%s"
+        # fmt = "{%%seg '%s'%%}{%%endseg%%}%s"
         fmt = "{%%seg %s%%}{%%endseg%%}%s"
         return fmt % (self.node_key, self.text)
+
 
 class Section(Node):
 
@@ -193,6 +199,7 @@ class Section(Node):
             self.richs.append(len(self.child_rvs))
         self.child_rvs.append(rv)
 
+
 class Cell(Node):
     ext_tag = 'cell'
 
@@ -229,7 +236,8 @@ class Cell(Node):
         self._parent.write_cell(self, rv, cty)
 
     def set_image_ref(self, image_ref, image_key):
-        self._parent.set_image_ref(image_ref, (self.rowx,self.colx,image_key))
+        self._parent.set_image_ref(image_ref, (self.rowx, self.colx, image_key))
+
 
 class TagCell(Section, Cell):
 
@@ -272,6 +280,7 @@ class RichTagCell(Cell):
         else:
             self.child_rvs.append(rv)
 
+
 class EmptyCell(Cell):
 
     def __init__(self, rowx, colx):
@@ -282,6 +291,7 @@ class EmptyCell(Cell):
         self.value = None
         self.cty = None
         self.cell_tag = None
+
 
 class XvCell(Cell):
 
@@ -306,10 +316,8 @@ class XvCell(Cell):
     def exit(self):
         self.write(self.rv, None)
 
-class CustCell(Cell):
 
-    def __init__(self, sheet_cell, rowx, colx, value, cty):
-        Cell.__init__(self, None, rowx, colx, value, cty)
+class CustCell(Cell):
 
     @property
     def node_tag(self):
@@ -326,6 +334,7 @@ class CustCell(Cell):
 
     def exit(self):
         self.write(self.rv, None)
+
 
 class Row(Node):
     ext_tag = 'row'
@@ -344,6 +353,7 @@ class Row(Node):
 
     def enter(self):
         self._parent.write_row(self)
+
 
 class Tree(Node):
     ext_tag = 'tree'
@@ -372,8 +382,9 @@ class Tree(Node):
     def set_image_ref(self, image_ref, image_key):
         self.sheet_writer.set_image_ref(image_ref, image_key)
 
+
 def create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_handler, user_tags):
-    s,cell_tag,head,tail = find_cell_tag(value)
+    s, cell_tag, head, tail = find_cell_tag(value)
     if cust_test(value, user_tags):
         cell = CustCell(sheet_cell, rowx, colx, s, data_type)
     elif s == '':
@@ -389,7 +400,7 @@ def create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_
             cell = RichTagCell(sheet_cell, rowx, colx, rich_text, data_type, font, rich_handler)
         else:
             _tail = head + len(s) - 1
-            _rich,_text = rich_handler.mid(rich_text, head, _tail)
+            _rich, _text = rich_handler.mid(rich_text, head, _tail)
             cell = RichTagCell(sheet_cell, rowx, colx, _rich, data_type, font, rich_handler)
     if cell_tag:
         cell.cell_tag = cell_tag

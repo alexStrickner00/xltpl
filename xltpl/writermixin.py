@@ -20,7 +20,7 @@ class SheetMixin(object):
     def write_cell(self, cell_node, rv, cty):
         self.current_col_num += 1
         self.merger.merge_cell(cell_node.rowx, cell_node.colx, self.current_row_num, self.current_col_num)
-        if cell_node.sheet_cell and not type(cell_node) == CustCell:
+        if cell_node.sheet_cell:
             self.cell(cell_node.sheet_cell, cell_node.rowx, cell_node.colx, self.current_row_num, self.current_col_num, rv, cty)
 
     def set_image_ref(self, image_ref, image_key):
