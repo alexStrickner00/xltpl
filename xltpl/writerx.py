@@ -32,8 +32,9 @@ class SheetWriter(SheetBase, SheetMixin):
 class BookWriter(BookBase, BookMixin):
     sheet_writer_cls = SheetWriter
 
-    def __init__(self, fname, debug=False):
+    def __init__(self, fname, debug=False, user_extensions=[]):
         config.debug = debug
+        self.user_extensions = user_extensions
         self.load(fname)
 
     def load(self, fname):
@@ -42,7 +43,7 @@ class BookWriter(BookBase, BookMixin):
         self.sheet_writer_map = {}
         self.sheet_resource_map = {}
         self.node_map = NodeMap()
-        self.jinja_env = JinjaEnvx(self.node_map)
+        self.jinja_env = JinjaEnvx(self.node_map, user_extensions=self.user_extensions)
         for index,rdsheet in enumerate(self.workbook.worksheets):
             merger = Merger(rdsheet)
             sheet_tree = self.build(rdsheet, index, merger)
@@ -52,6 +53,8 @@ class BookWriter(BookBase, BookMixin):
 
     def build(self, sheet, index, merger):
         tree = Tree(index, self.node_map)
+        user_tags = [ tag for ext in self.user_extensions for tag in ext.tags] #flattening
+        print(user_tags)
         max_row = max(sheet.max_row, merger.image_merger.max_row)
         max_col = max(sheet.max_column, merger.image_merger.max_col)
         for rowx in range(1, max_row + 1):
@@ -78,7 +81,7 @@ class BookWriter(BookBase, BookMixin):
                         cell_node = Cell(sheet_cell, rowx, colx, value, data_type)
                     else:
                         font = self.get_font(sheet_cell._style.fontId)
-                        cell_node = create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_handlerx)
+                        cell_node = create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_handlerx, user_tags)
                 else:
                     cell_node = Cell(sheet_cell, rowx, colx, value, data_type)
                 if cell_tag_map:

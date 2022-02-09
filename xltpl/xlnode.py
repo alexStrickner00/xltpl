@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import six
-from .utils import tag_test, xv_test, v_test, find_cell_tag, block_split, rich_split, img_test
+from .utils import cust_test, tag_test, xv_test, v_test, find_cell_tag, block_split, rich_split, img_test
 from .misc import TreeProperty
 
 class Node(object):
@@ -306,6 +306,25 @@ class XvCell(Cell):
     def exit(self):
         self.write(self.rv, None)
 
+class CustCell(Cell):
+
+    def __init__(self, sheet_cell, rowx, colx, value, cty, rvalue):
+        Cell.__init__(self, None, rowx, colx, rvalue, cty)
+        self.rvalue = rvalue
+
+    @property
+    def node_tag(self):
+        tag = self.rvalue.strip()
+        head = tag.strip()[:-2].strip()
+        tag = "%s,%d%%}" % (head, self.node_key)
+        # print(tag)
+        return tag
+
+    def enter(self):
+        self.rv = None
+
+    def exit(self):
+        self.write(self.rv, None)
 
 class Row(Node):
     ext_tag = 'row'
@@ -352,9 +371,13 @@ class Tree(Node):
     def set_image_ref(self, image_ref, image_key):
         self.sheet_writer.set_image_ref(image_ref, image_key)
 
-def create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_handler):
+def create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_handler, user_tags):
     s,cell_tag,head,tail = find_cell_tag(value)
-    if s == '':
+    # print(s, sheet_cell, value, cell_tag, head, tail)
+    if cust_test(value, user_tags):
+        print('create cust cell')
+        cell = CustCell(sheet_cell, rowx, colx, s, data_type, value)
+    elif s == '':
         cell = Cell(sheet_cell, rowx, colx, s, data_type)
     elif xv_test(s):
         cell = XvCell(sheet_cell, rowx, colx, s, data_type, True)
@@ -371,4 +394,5 @@ def create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_
             cell = RichTagCell(sheet_cell, rowx, colx, _rich, data_type, font, rich_handler)
     if cell_tag:
         cell.cell_tag = cell_tag
+        # print(cell_tag.beforerow, '\n', cell_tag.beforecell, '\n' , cell_tag.aftercell, '\n', cell_tag.extracell)
     return cell

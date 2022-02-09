@@ -33,15 +33,17 @@ class Env(Environment):
 
 class JinjaEnv(Env):
 
-    def __init__(self, node_map):
-        Env.__init__(self, extensions=[NodeExtension, SegmentExtension, YnExtension,
-                                       XvExtension, ImageExtension])
+    def __init__(self, node_map, user_extensions = []):
+        exts = [NodeExtension, SegmentExtension, YnExtension, XvExtension, ImageExtension]
+        exts.extend(user_extensions)
+        Env.__init__(self, extensions=exts)
         self.node_map = node_map
 
 
 class JinjaEnvx(Env):
 
-    def __init__(self, node_map):
-        Env.__init__(self, extensions=[NodeExtension, SegmentExtension, YnxExtension,
-                                       XvExtension, ImagexExtension])
+    def __init__(self, node_map, user_extensions = []):
+        exts = [NodeExtension, SegmentExtension, YnxExtension, XvExtension, ImagexExtension]
+        exts.extend(user_extensions)
+        Env.__init__(self, extensions=exts)
         self.node_map = node_map

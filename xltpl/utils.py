@@ -36,6 +36,14 @@ def xv_test(txt):
     xv = p.findall(txt)
     return bool(xv)
 
+def cust_test(txt, tags):
+    tag_regex = '(%s)' % '|'.join(tags)
+    regex = '%s *%s.+%s' % (BLOCK_START_STRING, tag_regex, BLOCK_END_STRING)
+    print(regex, 'txt: ',txt)
+    p = re.compile(regex)
+    v = p.findall(txt)
+    return bool(v)
+
 def v_test(txt):
     p = re.compile(VTEST)
     v = p.findall(txt)
