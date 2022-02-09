@@ -308,17 +308,18 @@ class XvCell(Cell):
 
 class CustCell(Cell):
 
-    def __init__(self, sheet_cell, rowx, colx, value, cty, rvalue):
-        Cell.__init__(self, None, rowx, colx, rvalue, cty)
-        self.rvalue = rvalue
+    def __init__(self, sheet_cell, rowx, colx, value, cty):
+        Cell.__init__(self, None, rowx, colx, value, cty)
 
     @property
     def node_tag(self):
-        tag = self.rvalue.strip()
+        tag = self.value.strip()
         head = tag.strip()[:-2].strip()
         tag = "%s,%d%%}" % (head, self.node_key)
-        # print(tag)
         return tag
+
+    def to_tag(self):
+        return Cell.to_tag(self)
 
     def enter(self):
         self.rv = None
@@ -373,10 +374,8 @@ class Tree(Node):
 
 def create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_handler, user_tags):
     s,cell_tag,head,tail = find_cell_tag(value)
-    # print(s, sheet_cell, value, cell_tag, head, tail)
     if cust_test(value, user_tags):
-        print('create cust cell')
-        cell = CustCell(sheet_cell, rowx, colx, s, data_type, value)
+        cell = CustCell(sheet_cell, rowx, colx, s, data_type)
     elif s == '':
         cell = Cell(sheet_cell, rowx, colx, s, data_type)
     elif xv_test(s):
@@ -394,5 +393,4 @@ def create_cell(sheet_cell, rowx, colx, value, rich_text, data_type, font, rich_
             cell = RichTagCell(sheet_cell, rowx, colx, _rich, data_type, font, rich_handler)
     if cell_tag:
         cell.cell_tag = cell_tag
-        # print(cell_tag.beforerow, '\n', cell_tag.beforecell, '\n' , cell_tag.aftercell, '\n', cell_tag.extracell)
     return cell

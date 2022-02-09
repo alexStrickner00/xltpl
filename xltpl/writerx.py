@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from .patchx import *
 from openpyxl import load_workbook
 from .basex import SheetBase, BookBase
 from .writermixin import SheetMixin, BookMixin
-from .utils import tag_test, parse_cell_tag
+from .utils import tag_test, parse_cell_tag, recompile_patterns
 from .xlnode import Tree, Row, Cell, EmptyCell, Node, create_cell
 from .jinja import JinjaEnvx
 from .nodemap import NodeMap
@@ -32,7 +31,9 @@ class SheetWriter(SheetBase, SheetMixin):
 class BookWriter(BookBase, BookMixin):
     sheet_writer_cls = SheetWriter
 
-    def __init__(self, fname, debug=False, user_extensions=[]):
+    def __init__(self, fname, debug=False, user_extensions=None):
+        if user_extensions is None:
+            user_extensions = []
         config.debug = debug
         self.user_extensions = user_extensions
         self.load(fname)
@@ -54,6 +55,7 @@ class BookWriter(BookBase, BookMixin):
     def build(self, sheet, index, merger):
         tree = Tree(index, self.node_map)
         user_tags = [ tag for ext in self.user_extensions for tag in ext.tags] #flattening
+        recompile_patterns(user_tags)
         print(user_tags)
         max_row = max(sheet.max_row, merger.image_merger.max_row)
         max_col = max(sheet.max_column, merger.image_merger.max_col)
