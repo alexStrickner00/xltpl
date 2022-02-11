@@ -11,7 +11,10 @@ def get_type(value):
     if isinstance(value, NUMERIC_TYPES):
         dt = 'n'
     elif isinstance(value, STRING_TYPES):
-        dt = 's'
+        if value.startswith('='):
+            dt = 'f'
+        else:
+            dt = 's'
     elif isinstance(value, TIME_TYPES):
         dt = 'd'
     elif isinstance(value, BOOL_TYPE):
